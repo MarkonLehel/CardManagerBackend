@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CardManagerBackend.Context;
 using CardManagerBackend.Models;
+using CardManagerBackend.Enums;
+using System.Diagnostics;
 
 namespace CardManagerAPI.Controllers
 {
@@ -41,10 +43,11 @@ namespace CardManagerAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Card>> PostCard(Card card)
         {
+            Debug.Write("Request received");
             _context.Cards.Add(card);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCard", new { id = card.CardID }, card);
+            return Ok();
         }
 
 

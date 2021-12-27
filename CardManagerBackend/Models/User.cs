@@ -29,6 +29,11 @@ namespace CardManagerBackend.Models
             LastPasswordChange = DateTime.UtcNow;
         }
 
+
+        public void ChangeName(string firstName, string lastName) {
+            FirstName = firstName;
+            LastName = LastName;
+        }
         public bool CheckLoginCredentials(string email, string password) {
 
             Debug.WriteLine(Hasher.HashPassword(password) + " = " + HashedPassword);

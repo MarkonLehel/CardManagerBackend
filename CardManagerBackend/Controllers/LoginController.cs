@@ -26,6 +26,7 @@ namespace CardManagerAPI.Controllers
         {
             string email = data["email"].ToString();
             string password = data["password"].ToString();
+            bool adminLogin = data["adminLogin"].ToString()== "true" ? true: false;
 
             User user = null;
             foreach (User userToCheck in _context.Users.ToList())
@@ -40,14 +41,14 @@ namespace CardManagerAPI.Controllers
             if( user == null)
             {
                 return NotFound();
-            } else if (!user.CheckLoginCredentials(email, password))
-            {
+            } else if (!user.CheckLoginCredentials(email, password)) {
                 return ValidationProblem();
-            } else
-            {
+            } else if(adminLogin == user.IsAdmin){
                 user.LastLogin = DateTime.UtcNow;
                 return Ok(user.UserID);
             }
+            else return ValidationProblem();
+
         }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using CardManagerBackend.Context;
 using CardManagerBackend.Models;
 using System.Diagnostics;
+using Newtonsoft.Json.Linq;
 
 namespace CardManagerAPI.Controllers
 {
@@ -43,22 +44,21 @@ namespace CardManagerAPI.Controllers
             return user;
         }
 
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        [HttpPut("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] JObject data)
         {
-            if (id != user.UserID)
-            {
-                return BadRequest();
-            }
+            int id = int.Parse(data["id"].ToString());
+            string password = data["password"].ToString();
+            User user = await _context.Users.FindAsync(id);
 
+            user.ChangePassword(password);
            
             _context.Entry(user).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -71,8 +71,36 @@ namespace CardManagerAPI.Controllers
                     throw;
                 }
             }
+        }
 
-            return NoContent();
+        [HttpPut("ChangeName")]
+        public async Task<IActionResult> ChangeName([FromBody] JObject data)
+        {
+            int id = int.Parse(data["id"].ToString());
+            string firstName = data["firstName"].ToString();
+            string lastName = data["firstName"].ToString();
+            User user = await _context.Users.FindAsync(id);
+
+            user.ChangeName(firstName,lastName);
+
+            _context.Entry(user).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         // POST: api/Users
@@ -81,13 +109,17 @@ namespace CardManagerAPI.Controllers
         {
             foreach (User user in _context.Users.ToList())
             {
-                if (user.Email == userToAdd.Email)
+                Debug.WriteLine(user.Email + "   " + userToAdd.Email);
+                if (user.Email == userToAdd.Email) {
+                    Debug.WriteLine("Conflict!");
                     return Conflict();
+                }
             }
             userToAdd.ChangePassword(userToAdd.HashedPassword);
+            userToAdd.LastLogin = DateTime.UtcNow;
+            userToAdd.CreatedAt = DateTime.UtcNow;
             _context.Users.Add(userToAdd);
             await _context.SaveChangesAsync();
-
             return CreatedAtAction("GetUser", new { id = userToAdd.UserID }, userToAdd);
         }
 
