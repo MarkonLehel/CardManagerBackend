@@ -14,7 +14,7 @@ namespace CardManagerBackend.Models
         public DateTime Date { get; set; }
         public int Amount { get; set; }
         public bool Finnished { get; set; }
-        public int CardNumber { get; set; }
+        public long CardNumber { get; set; }
         public int VendorID { get; set; }
     }
 }
